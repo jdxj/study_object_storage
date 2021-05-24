@@ -1,0 +1,1 @@
+# study_object_storage
