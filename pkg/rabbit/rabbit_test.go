@@ -20,21 +20,21 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	b1 = New("guest", "guest", "127.0.0.1", bk1, 5672, 1)
+	b1 = New("guest", "guest", "127.0.0.1", bk1, 5672)
 	err := b1.Connect()
 	if err != nil {
 		log.Fatalln(err)
 	}
 	defer b1.Close()
 
-	b2 = New("guest", "guest", "127.0.0.1", bk2, 5672, 2)
+	b2 = New("guest", "guest", "127.0.0.1", bk2, 5672)
 	err = b2.Connect()
 	if err != nil {
 		log.Fatalln(err)
 	}
 	defer b2.Close()
 
-	b3 = New("guest", "guest", "127.0.0.1", bk2, 5672, 3)
+	b3 = New("guest", "guest", "127.0.0.1", bk2, 5672)
 	err = b3.Connect()
 	if err != nil {
 		log.Fatalln(err)

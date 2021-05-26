@@ -18,8 +18,8 @@ var (
 	broker *Broker
 )
 
-func Init(user, pass, host, bindingKey string, port, node int) error {
-	broker = New(user, pass, host, bindingKey, port, node)
+func Init(user, pass, host, bindingKey string, port int) error {
+	broker = New(user, pass, host, bindingKey, port)
 	return broker.Connect()
 }
 
@@ -42,13 +42,12 @@ type Message struct {
 	Body    []byte
 }
 
-func New(user, pass, host, bindingKey string, port, node int) *Broker {
+func New(user, pass, host, bindingKey string, port int) *Broker {
 	b := &Broker{
 		user:       user,
 		pass:       pass,
 		host:       host,
 		port:       port,
-		node:       node,
 		bindingKey: bindingKey,
 	}
 
@@ -60,7 +59,6 @@ type Broker struct {
 	pass string
 	host string
 	port int
-	node int
 
 	bindingKey string
 	conn       *amqp.Connection
@@ -85,9 +83,8 @@ func (b *Broker) Connect() error {
 
 // Call 期待响应
 func (b *Broker) Call(ctx context.Context, routingKey string, msg *Message) ([]*Message, error) {
-	queueName := fmt.Sprintf("queue.call.%s", b.bindingKey)
 	queue, err := b.channel.QueueDeclare(
-		queueName, false, true, false, false, nil)
+		"", false, true, false, false, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -125,9 +122,8 @@ func (b *Broker) Call(ctx context.Context, routingKey string, msg *Message) ([]*
 		return nil, err
 	}
 
-	consumerName := fmt.Sprintf("consumer.call.%s", b.bindingKey)
 	msgChan, err := b.channel.Consume(
-		queue.Name, consumerName, true, false, false, false, nil)
+		queue.Name, "", true, false, false, false, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -173,21 +169,18 @@ func (b *Broker) Publish(routingKey string, msg *Message) error {
 }
 
 func (b *Broker) Subscribe(h Handler) error {
-	queueName := fmt.Sprintf("queue.subscribe.%d", b.node)
 	queue, err := b.channel.QueueDeclare(
-		queueName, true, false, false, false, nil)
+		"", false, true, false, false, nil)
 	if err != nil {
 		return err
 	}
-
 	err = b.channel.QueueBind(queue.Name, b.bindingKey, exchangeName, false, nil)
 	if err != nil {
 		return err
 	}
 
-	consumerName := fmt.Sprintf("consumer.subscribe.%s", b.bindingKey)
 	msgChan, err := b.channel.Consume(
-		queue.Name, consumerName, false, false, false, false, nil)
+		queue.Name, "", false, false, false, false, nil)
 	if err != nil {
 		return err
 	}
@@ -217,7 +210,6 @@ func (b *Broker) Subscribe(h Handler) error {
 			if err != nil {
 				log.Printf("rabbit ack: %s\n", err)
 			}
-
 		}
 	}()
 	return nil
