@@ -20,21 +20,21 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	b1 = New("guest", "guest", "127.0.0.1", bk1, 5672)
+	b1 = New("guest", "guest", "127.0.0.1", 5672)
 	err := b1.Connect()
 	if err != nil {
 		log.Fatalln(err)
 	}
 	defer b1.Close()
 
-	b2 = New("guest", "guest", "127.0.0.1", bk2, 5672)
+	b2 = New("guest", "guest", "127.0.0.1", 5672)
 	err = b2.Connect()
 	if err != nil {
 		log.Fatalln(err)
 	}
 	defer b2.Close()
 
-	b3 = New("guest", "guest", "127.0.0.1", bk2, 5672)
+	b3 = New("guest", "guest", "127.0.0.1", 5672)
 	err = b3.Connect()
 	if err != nil {
 		log.Fatalln(err)
@@ -50,7 +50,7 @@ func TestBroker_Call(t *testing.T) {
 		msg.Body = append(msg.Body, []byte(", world!")...)
 		return msg, nil
 	}
-	err := b2.Subscribe(h)
+	err := b2.Subscribe(bk2, h)
 	if err != nil {
 		log.Fatalln()
 	}
@@ -75,12 +75,12 @@ func TestBroker_Subscribe(t *testing.T) {
 		return msg, nil
 	}
 
-	err := b2.Subscribe(h)
+	err := b2.Subscribe(bk2, h)
 	if err != nil {
 		t.Fatalf("%s\n", err)
 	}
 
-	err = b3.Subscribe(h)
+	err = b3.Subscribe(bk2, h)
 	if err != nil {
 		t.Fatalf("%s\n", err)
 	}
@@ -94,5 +94,5 @@ func TestBroker_Subscribe(t *testing.T) {
 		t.Fatalf("%s\n", err)
 	}
 
-	time.Sleep(10 * time.Second)
+	time.Sleep(5 * time.Second)
 }

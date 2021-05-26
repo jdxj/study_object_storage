@@ -18,8 +18,8 @@ var (
 	broker *Broker
 )
 
-func Init(user, pass, host, bindingKey string, port int) error {
-	broker = New(user, pass, host, bindingKey, port)
+func Init(user, pass, host string, port int) error {
+	broker = New(user, pass, host, port)
 	return broker.Connect()
 }
 
@@ -31,8 +31,8 @@ func Publish(routingKey string, msg *Message) error {
 	return broker.Publish(routingKey, msg)
 }
 
-func Subscribe(h Handler) error {
-	return broker.Subscribe(h)
+func Subscribe(bindingKey string, h Handler) error {
+	return broker.Subscribe(bindingKey, h)
 }
 
 type Handler func(*Message) (*Message, error)
@@ -42,15 +42,13 @@ type Message struct {
 	Body    []byte
 }
 
-func New(user, pass, host, bindingKey string, port int) *Broker {
+func New(user, pass, host string, port int) *Broker {
 	b := &Broker{
-		user:       user,
-		pass:       pass,
-		host:       host,
-		port:       port,
-		bindingKey: bindingKey,
+		user: user,
+		pass: pass,
+		host: host,
+		port: port,
 	}
-
 	return b
 }
 
@@ -60,9 +58,8 @@ type Broker struct {
 	host string
 	port int
 
-	bindingKey string
-	conn       *amqp.Connection
-	channel    *amqp.Channel
+	conn    *amqp.Connection
+	channel *amqp.Channel
 }
 
 func (b *Broker) Connect() error {
@@ -168,13 +165,13 @@ func (b *Broker) Publish(routingKey string, msg *Message) error {
 		exchangeName, routingKey, false, false, pub)
 }
 
-func (b *Broker) Subscribe(h Handler) error {
+func (b *Broker) Subscribe(bindingKey string, h Handler) error {
 	queue, err := b.channel.QueueDeclare(
 		"", false, true, false, false, nil)
 	if err != nil {
 		return err
 	}
-	err = b.channel.QueueBind(queue.Name, b.bindingKey, exchangeName, false, nil)
+	err = b.channel.QueueBind(queue.Name, bindingKey, exchangeName, false, nil)
 	if err != nil {
 		return err
 	}
@@ -199,6 +196,10 @@ func (b *Broker) Subscribe(h Handler) error {
 			}
 
 			if msgA != nil { // 有响应, 那么发送反馈
+				if d.ReplyTo == "" {
+					log.Printf("rabbit ReplyTo is empty\n")
+				}
+
 				err = b.Publish(d.ReplyTo, msgA)
 				if err != nil {
 					log.Printf("b.Publish: %s", err)
