@@ -1,0 +1,39 @@
+logger:
+  file_name: "./log/api.log"
+  app_name: "api"
+  max_size: 128
+  max_age: 30
+  max_backups: 30
+  level: -1
+  local_time: true
+  compress: false
+gate:
+  host: ""
+  port: 0
+  node: 0
+web:
+  host: "127.0.0.1"
+  port: 49152
+  mode: "debug"
+mysql:
+  user: ""
+  pass: ""
+  dbname: ""
+  host: ""
+  port: 0
+mongo:
+  user: ""
+  pass: ""
+  dbname: ""
+  host: ""
+  port: 0
+redis:
+  pass: ""
+  host: ""
+  port: 0
+  db: 0
+rabbit:
+  user: "guest"
+  pass: "guest"
+  host: "127.0.0.1"
+  port: 5672
