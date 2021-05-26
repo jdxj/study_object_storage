@@ -14,6 +14,27 @@ const (
 	exchangeKind = "topic"
 )
 
+var (
+	broker *Broker
+)
+
+func Init(user, pass, host, bindingKey string, port, node int) error {
+	broker = New(user, pass, host, bindingKey, port, node)
+	return broker.Connect()
+}
+
+func Call(ctx context.Context, routingKey string, msg *Message) ([]*Message, error) {
+	return broker.Call(ctx, routingKey, msg)
+}
+
+func Publish(routingKey string, msg *Message) error {
+	return broker.Publish(routingKey, msg)
+}
+
+func Subscribe(h Handler) error {
+	return broker.Subscribe(h)
+}
+
 type Handler func(*Message) (*Message, error)
 
 type Message struct {
