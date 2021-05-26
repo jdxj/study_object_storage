@@ -21,12 +21,13 @@ type Message struct {
 	Body    []byte
 }
 
-func New(user, pass, host, bindingKey string, port int) *Broker {
+func New(user, pass, host, bindingKey string, port, node int) *Broker {
 	b := &Broker{
 		user:       user,
 		pass:       pass,
 		host:       host,
 		port:       port,
+		node:       node,
 		bindingKey: bindingKey,
 	}
 
@@ -38,6 +39,7 @@ type Broker struct {
 	pass string
 	host string
 	port int
+	node int
 
 	bindingKey string
 	conn       *amqp.Connection
@@ -150,7 +152,7 @@ func (b *Broker) Publish(routingKey string, msg *Message) error {
 }
 
 func (b *Broker) Subscribe(h Handler) error {
-	queueName := fmt.Sprintf("queue.subscribe.%s", b.bindingKey)
+	queueName := fmt.Sprintf("queue.subscribe.%d", b.node)
 	queue, err := b.channel.QueueDeclare(
 		queueName, true, false, false, false, nil)
 	if err != nil {
