@@ -96,7 +96,7 @@ func (b *Broker) Call(ctx context.Context, routingKey string, msg *Message) ([]*
 		}
 	}()
 
-	err = b.channel.QueueBind(queue.Name, b.bindingKey, exchangeName, false, nil)
+	err = b.channel.QueueBind(queue.Name, queue.Name, exchangeName, false, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -108,7 +108,7 @@ func (b *Broker) Call(ctx context.Context, routingKey string, msg *Message) ([]*
 		DeliveryMode:    1,
 		Priority:        0,
 		CorrelationId:   "",
-		ReplyTo:         b.bindingKey,
+		ReplyTo:         queue.Name,
 		Expiration:      "",
 		MessageId:       "",
 		Timestamp:       time.Time{},
