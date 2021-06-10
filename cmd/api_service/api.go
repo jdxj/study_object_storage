@@ -3,6 +3,8 @@ package main
 import (
 	"time"
 
+	"github.com/gin-gonic/gin"
+
 	"github.com/jdxj/study_object_storage/pkg/logger"
 	"github.com/jdxj/study_object_storage/pkg/rabbit"
 )
@@ -21,6 +23,8 @@ type API struct {
 	port int
 
 	sm *StorageManager
+
+	service *gin.Engine
 }
 
 func (api *API) Run() error {
@@ -66,4 +70,11 @@ func (api *API) RemoveExpiredStorage() {
 			api.sm.DelRange(h)
 		}
 	}()
+}
+
+func (api *API) runService() {
+	api.service = gin.Default()
+
+	api.service.POST("/objects/:name")
+
 }
